@@ -111,19 +111,7 @@ router.get('/test-connection', async (req, res) => {
     }
   });
   
-  router.get('/appointments/doctor/:doctorId', async (req, res) => {
-    try {
-      const database = req.app.locals.database;
-      const appointmentsCollection = database.collection('appointData');
-      const appointments = await appointmentsCollection.find({ 
-        doctorId: new ObjectId(req.params.doctorId) 
-      }).toArray();
-      res.json(appointments);
-    } catch (error) {
-      console.error('Error fetching doctor appointments:', error);
-      res.status(500).json({ message: 'Error fetching doctor appointments', error: error.message });
-    }
-  });
+  
   
   router.get('/appointments/patient/:patientId', async (req, res) => {
     try {
@@ -136,6 +124,28 @@ router.get('/test-connection', async (req, res) => {
     } catch (error) {
       console.error('Error fetching patient appointments:', error);
       res.status(500).json({ message: 'Error fetching patient appointments', error: error.message });
+    }
+  });
+
+  //testing
+  router.get('/appointments/doctor/:doctorId', authMiddleware, async (req, res) => {
+    try {
+      const database = req.app.locals.database;
+      const appointmentsCollection = database.collection('appointData');
+      const doctorId = req.params.doctorId;
+  
+      console.log('Fetching appointments for doctor:', doctorId);
+  
+      const appointments = await appointmentsCollection.find({ 
+        doctorId: new ObjectId(doctorId) 
+      }).toArray();
+  
+      console.log('Found appointments:', appointments);
+  
+      res.json(appointments);
+    } catch (error) {
+      console.error('Error fetching doctor appointments:', error);
+      res.status(500).json({ message: 'Error fetching doctor appointments', error: error.message });
     }
   });
   
@@ -571,6 +581,48 @@ router.get('/doctors/search/:term', async (req, res) => {
   }
 });
 
+
+// ... existing imports and code ...
+
+router.post('/appointments/create', authMiddleware, async (req, res) => {
+  try {
+    console.log('Received appointment data:', req.body);
+    const database = req.app.locals.database;
+    const appointmentsCollection = database.collection('appointData');
+    
+    const { doctorId, patientId, date } = req.body;
+
+    console.log('Parsed data:', { doctorId, patientId, date });
+
+    // Validate doctorId and patientId
+    if (!ObjectId.isValid(doctorId) || !ObjectId.isValid(patientId)) {
+      console.log('Invalid doctorId or patientId');
+      return res.status(400).json({ message: 'Invalid doctorId or patientId' });
+    }
+
+    // Validate date
+    if (!date) {
+      console.log('Date is missing');
+      return res.status(400).json({ message: 'Date is required' });
+    }
+
+    const newAppointment = {
+      doctorId: ObjectId.createFromHexString(doctorId),
+      patientId: ObjectId.createFromHexString(patientId),
+      date: new Date(date)
+    };
+
+    console.log('New appointment object:', newAppointment);
+
+    const result = await appointmentsCollection.insertOne(newAppointment);
+    res.status(201).json({ message: 'Appointment created successfully', appointmentId: result.insertedId });
+  } catch (error) {
+    console.error('Error adding new appointment:', error);
+    res.status(500).json({ message: 'Error adding new appointment', error: error.message });
+  }
+});
+
+// ... rest of the file .
 
 // Catch-all route for unmatched routes
 router.use('*', (req, res) => {

@@ -56,9 +56,9 @@ const PatientLogout = ({ user }) => {
           <p className="user-role">Patient</p>
         </div>
       </div>
-      <button onClick={handleLogout} className="logout-button">
+      {/* <button onClick={handleLogout} className="logout-button">
         <i className="fas fa-sign-out-alt"></i> Logout
-      </button>
+      </button> */}
     </div>
   );
 };

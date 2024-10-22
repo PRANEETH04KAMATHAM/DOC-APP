@@ -79,7 +79,7 @@
 
 // export default Login;
 
-
+/** BEFORE WAD LAB */
 
 // import React, { useState } from 'react';
 // import { Link, useNavigate } from 'react-router-dom';
@@ -170,11 +170,13 @@
 // export default Login;
 
 
+/** AFTER WAD LAB */
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../login/Login.css';
 import { loginUser } from '../../api';
+import { useAuth } from '../../AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -185,6 +187,7 @@ const Login = () => {
   const [role, setRole] = useState('patient');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleInputChange = e => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -196,21 +199,17 @@ const Login = () => {
 
     try {
       const response = await loginUser({ ...formData, role });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', response.data.userId);
-      localStorage.setItem('role', response.data.role);
+      await login(response.data); // Use await here as login is now an async function
 
-      console.log('Login successful, token set:', response.data.token);
-      console.log('User ID set:', response.data.userId);
-      console.log('Role set:', response.data.role);
-      console.log('localStorage after login:', JSON.stringify(localStorage));
+      console.log('Login successful, user data:', response.data);
 
-      if (role === 'patient') {
+      if (response.data.role === 'patient') {
         navigate('/patient-dashboard');
       } else {
         navigate('/doctor-dashboard');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.response?.data?.message || 'An error occurred during login');
     }
   };

@@ -6,17 +6,20 @@ import './DoctorAppointments.css';
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { user } = useOutletContext();
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        if (user && user._id) {
-          const response = await getDoctorAppointments(user._id);
-          setAppointments(response.data);
+        if (user && user.userId) {
+          const response = await getDoctorAppointments(user.userId);
+          console.log('Fetched appointments:', response);
+          setAppointments(response);
         }
       } catch (error) {
         console.error('Error fetching appointments:', error);
+        setError('Failed to fetch appointments. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -29,6 +32,10 @@ const DoctorAppointments = () => {
     return <div>Loading appointments...</div>;
   }
 
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
   return (
     <div className="appointments">
       <h2>Your Appointments</h2>
@@ -38,7 +45,7 @@ const DoctorAppointments = () => {
         <div className="appointments-grid">
           {appointments.map(app => (
             <div key={app._id} className="appointment-card">
-              <h3>{app.patientName}</h3>
+              <h3>Patient ID: {app.patientId}</h3>
               <p><strong>Date:</strong> {new Date(app.date).toLocaleDateString()}</p>
               <p><strong>Time:</strong> {new Date(app.date).toLocaleTimeString()}</p>
             </div>

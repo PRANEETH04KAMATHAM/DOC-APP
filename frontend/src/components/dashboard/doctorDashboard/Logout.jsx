@@ -95,7 +95,7 @@ const Logout = ({ user }) => {
       <span className="user-greeting">
         Hello, {displayName}
       </span>
-      <button onClick={handleLogout} className="logout-button">Logout</button>
+      {/* <button onClick={handleLogout} className="logout-button">Logout</button> */}
     </div>
   );
 };

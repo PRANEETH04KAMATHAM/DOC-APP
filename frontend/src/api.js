@@ -20,17 +20,32 @@ export const getPatient = (id) => api.get(`/patients/${id}`);
 
 // Appointment-related API calls
 export const getAllAppointments = () => api.get('/appointments');
-export const addAppointment = (appointmentData) => api.post('/appointments', {
-  doctorId: appointmentData.doctorId,
-  patientId: appointmentData.patientId,
-  date: appointmentData.date
-});
+// export const addAppointment = (appointmentData) => api.post('/appointments', {
+//   doctorId: appointmentData.doctorId,
+//   patientId: appointmentData.patientId,
+//   date: appointmentData.date
+// });
 export const getAppointment = (id) => api.get(`/appointments/${id}`);
 
 // New appointment-related API calls
-export const getDoctorAppointments = (doctorId) => api.get(`/appointments/doctor/${doctorId}`);
+
 export const getPatientAppointments = (patientId) => api.get(`/appointments/patient/${patientId}`);
 
+
+//testing
+export const getDoctorAppointments = async (doctorId) => {
+  const token = localStorage.getItem('token');
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointments/doctor/${doctorId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    console.log('Doctor appointments response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctor appointments:', error);
+    throw error;
+  }
+};
 
 
 // Add this new function
@@ -45,10 +60,13 @@ export const registerUser = (userData) => {
   });
 };
 
+//working
 export const loginUser = (userData) => {
   return axios.post(`${API_BASE_URL}/login`, userData);
 };
 
+
+//working
 export const getUserDetails = (userId) => {
   const token = localStorage.getItem('token');
   return axios.get(`${API_BASE_URL}/user/${userId}`, {
@@ -56,24 +74,6 @@ export const getUserDetails = (userId) => {
   });
 };
 
-// export const getUserDetails = async (userId) => {
-//   const token = localStorage.getItem('token');
-//   console.log('getUserDetails called with ID:', userId);
-//   console.log('Token:', token);
-//   try {
-//     if (!userId) {
-//       throw new Error('User ID is undefined');
-//     }
-//     const response = await axios.get(`${API_BASE_URL}/user/${userId}`, {
-//       headers: { Authorization: `Bearer ${token}` }
-//     });
-//     console.log('getUserDetails response:', response.data);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error in getUserDetails:', error);
-//     throw error;
-//   }
-// };
 
 export const checkUser = (userId) => {
   return axios.get(`${API_BASE_URL}/check-user/${userId}`);
@@ -120,7 +120,8 @@ export const checkUser = (userId) => {
 //       throw error;
 //     });
 // };
-export const searchDoctors = (searchTerm) => {
+
+export const searchDoctors = async (searchTerm) => {
   console.log('Searching for doctor by specialization:', searchTerm);
   return axios.get(`${API_BASE_URL}/doctors/search/${encodeURIComponent(searchTerm)}`)
     .then(response => {
@@ -139,6 +140,20 @@ export const searchDoctors = (searchTerm) => {
       }
       throw error;
     });
+};
+
+export const addAppointment = async (appointmentData) => {
+  const token = localStorage.getItem('token');
+  console.log('Sending appointment data:', appointmentData);
+  try {
+    const response = await axios.post(`${API_BASE_URL}/appointments/create`, appointmentData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error in addAppointment:', error.response ? error.response.data : error.message);
+    throw error;
+  }
 };
 
 export default api;
